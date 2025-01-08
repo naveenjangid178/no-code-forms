@@ -24,7 +24,7 @@ const ViewForm = () => {
           }
         );
         console.log("Fetched responses:", responsesResponse.data); // Debug response
-        setResponses(responsesResponse.data.data || []); // Adjust based on actual API response structure
+        setResponses(responsesResponse.data.data || [""]); // Adjust based on actual API response structure
       } catch (error) {
         console.error("Error fetching responses:", error);
         setError(error.response?.data?.message || "Failed to fetch responses");

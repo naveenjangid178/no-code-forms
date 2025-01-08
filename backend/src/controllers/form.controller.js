@@ -5,47 +5,57 @@ import { Response } from "../models/response.model.js"
 import { ApiResponse } from "../utils/ApiResponse.js";
 
 const createForm = asyncHandler(async (req, res) => {
-    const { title, description, fields, style, isPublished } = req.body;
-
-    if (!title || !fields || fields.length === 0) {
-        throw new ApiError(400, 'Title and fields are required');
+    try {
+        const { title, description, fields, style, isPublished } = req.body;
+    
+        if (!title || !fields || fields.length === 0) {
+            throw new ApiError(400, 'Title and fields are required');
+        }
+    
+        const newForm = new Form({
+            title,
+            description,
+            fields,
+            style,
+            isPublished: isPublished || false,
+        });
+    
+        await newForm.save();
+    
+        res.status(201).json(
+            new ApiResponse(201, {formId: newForm._id}, 'Form created successfully')
+        );
+    } catch (error) {
+        console.log(error);
+        
     }
-
-    const newForm = new Form({
-        title,
-        description,
-        fields,
-        style,
-        isPublished: isPublished || false,
-    });
-
-    await newForm.save();
-
-    res.status(201).json(
-        new ApiResponse(201, {formId: newForm._id}, 'Form created successfully')
-    );
 });
 
 const updateForm = asyncHandler(async (req, res) => {
-    const { formId } = req.params;
-    const { title, description, fields, style, isPublished } = req.body;
-
-    const form = await Form.findById(formId);
-    if (!form) {
-        throw new ApiError(404, 'Form not found');
+    try {
+        const { formId } = req.params;
+        const { title, description, fields, style, isPublished } = req.body;
+    
+        const form = await Form.findById(formId);
+        if (!form) {
+            throw new ApiError(404, 'Form not found');
+        }
+    
+        form.title = title || form.title;
+        form.description = description || form.description;
+        form.fields = fields || form.fields;
+        form.style = style || form.style;
+        form.isPublished = typeof isPublished === 'boolean' ? isPublished : form.isPublished;
+    
+        const updatedForm = await form.save();
+    
+        res.status(200).json(
+            new ApiResponse(200, {form: updatedForm}, 'Form updated successfully')
+        );
+    } catch (error) {
+        console.log(error);
+        
     }
-
-    form.title = title || form.title;
-    form.description = description || form.description;
-    form.fields = fields || form.fields;
-    form.style = style || form.style;
-    form.isPublished = typeof isPublished === 'boolean' ? isPublished : form.isPublished;
-
-    const updatedForm = await form.save();
-
-    res.status(200).json(
-        new ApiResponse(200, {form: updatedForm}, 'Form updated successfully')
-    );
 });
 
 const deleteForm = asyncHandler(async (req, res) => {
